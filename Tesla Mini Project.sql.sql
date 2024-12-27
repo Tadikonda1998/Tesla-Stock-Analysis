@@ -147,7 +147,41 @@ SELECT *
 FROM TeslaStockData
 WHERE Date = (SELECT MAX(Date) FROM TeslaStockData);
 
---26 
+--26 Rolling Average for Closing Prices (7-day window)
+
+SELECT Date, ClosePrice, AVG(ClosePrice) OVER (ORDER BY Date ROWS BETWEEN 6 PRECEDING AND CURRENT ROW) AS RollingAvgClose
+FROM TeslaStockData;
+
+--27 Highest Price Difference (High - Low)
+
+SELECT Date, (HighPrice - LowPrice) AS PriceDifference
+FROM TeslaStockData
+ORDER BY PriceDifference DESC;
+
+--28 Moving Average for Volume (7-day window)
+
+SELECT Date, Volume, AVG(Volume) OVER (ORDER BY Date ROWS BETWEEN 6 PRECEDING AND CURRENT ROW) AS RollingAvgVolume
+FROM TeslaStockData;
+
+
+--29 Consecutive Gains in Closing Price
+
+WITH PriceComparison AS (
+    SELECT Date, ClosePrice, 
+           LAG(ClosePrice) OVER (ORDER BY Date) AS PrevClosePrice
+    FROM TeslaStockData
+)
+SELECT Date, ClosePrice
+FROM PriceComparison
+WHERE ClosePrice > PrevClosePrice;
+
+--30 Join Example: Daily Price and Volume
+
+SELECT a1.Date, a1.ClosePrice, a2.Volume
+FROM TeslaStockData a1
+INNER JOIN TeslaStockData a2
+ON a1.Date = a2.Date
+ORDER BY a1.Date; 
 
 
 
